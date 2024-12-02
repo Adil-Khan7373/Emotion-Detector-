@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recognition</title>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #6a11cb 25%, #2575fc 25%, #2575fc 50%, #6a11cb 50%, #6a11cb 75%, #2575fc 75%);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite; /* Moving background */
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            display: none; /* Initially hidden */
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Button Styling */
+        .btn {
+            padding: 15px 30px;
+            margin: 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            background-color: #ff5e57;
+            cursor: pointer;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #ff785e;
+        }
+
+        /* Specific Styles for Pages */
+        .welcome-page {
+            display: flex;
+            justify-content: space-between; /* Align items to left and right */
+            align-items: center; /* Center vertically */
+        }
+
+        .emotion-preview {
+            width: 40%; /* Adjust width as needed */
+        }
+
+        .facts-page {
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+        }
+
+        .emoji {
+            font-size: 5rem;
+            margin-top: -10px; /* Adjust position */
+        }
+
+        /* Detection Page Styling */
+        #detect {
+          display: none; /* Initially hidden */
+          text-align: center; 
+          margin-top: -50px; 
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Welcome Page -->
+    <div id="welcome" class="container welcome-page">
+        <div class="welcome-message">
+            <h1>Welcome to Emotion Recognition!</h1>
+            <p>Experience the power of real-time emotion detection with cutting-edge technology.</p>
+            
+            <!-- Navigation Buttons -->
+            <button class="btn" onclick="goToFacts()">Next</button>
+            <button class="btn" onclick="endSession()">End Session</button>
+        </div>
+        
+        <div class="emotion-preview">
+          <img src="emotion_generator_preview.png" alt="Emotion Generator Preview" style="max-width:100%; height:auto;">
+          <!-- Replace with actual preview image -->
+        </div>
+    </div>
+
+    <!-- Facts Page -->
+    <div id="facts" class="container facts-page">
+        <h1>Did You Know?</h1>
+        <p>Emotions play a crucial role in our daily lives.</p>
+        
+        <!-- Animated Characters -->
+        <div>
+          <span class="emoji">😊</span>
+          <span class="emoji">😡</span>
+          <span class="emoji">😢</span>
+          <span class="emoji">😲</span>
+          <span class="emoji">😂</span>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <button class="btn" onclick="goToDetect()">Start Detection</button>
+        <button class="btn" onclick="endSession()">End Session</button>
+    </div>
+
+    <!-- Detection Page -->
+    <div id="detect" class="container">
+      <h1>Real-Time Emotion Recognition</h1>
+      <!-- Corrected the image source to 'emotion_recognition' endpoint -->
+      <img src="{{ url_for('emotion_recognition') }}" alt="Live Feed" style="max-width:100%; height:auto;">
+      <p>Analyzing emotions in real-time...</p>
+
+      <!-- Statistical Information Section -->
+      <div class="stats">
+          <h2>Detected Emotions:</h2>
+          <p id="emotionStats">😊 : 0 | 😡 : 0 | 😢 : 0 | 😲 : 0 | 😂 : 0</p>
+          <p id="totalEmotions">Total Emotions Detected: <span id="totalCount">0</span></p>
+      </div>
+
+      <!-- Mood Graph Placeholder -->
+      <canvas id="moodGraph" width="400" height="200"></canvas> <!-- Placeholder for graph -->
+
+      <!-- End Detection Button -->
+      <button class="btn end-btn" onclick="endSession()">End Detection</button> 
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js for graphs -->
+    <script>
+      // Functions to toggle between pages
+      function goToFacts() {
+          document.getElementById('welcome').style.display = 'none';
+          document.getElementById('facts').style.display = 'block';
+      }
+
+      function goToDetect() {
+          document.getElementById('facts').style.display = 'none';
+          document.getElementById('detect').style.display = 'block';
+          
+          // Start emotion detection simulation
+          simulateEmotionDetection();
+      }
+
+      function endSession() {
+          alert('Session Ended. Thank you for using Emotion Recognition!');
+          location.reload(); // Reload to reset the page
+      }
+
+      function simulateEmotionDetection() {
+          let emotions = ['😊', '😡', '😢', '😲', '😂'];
+          let counts = [Math.floor(Math.random() * (10 - 1 + 1)) + 1,
+                        Math.floor(Math.random() * (10 - 1 + 1)) + 1,
+                        Math.floor(Math.random() * (10 - 1 + 1)) + 1,
+                        Math.floor(Math.random() * (10 - 1 + 1)) + 1,
+                        Math.floor(Math.random() * (10 - 1 + 1)) + 1];
+          
+          let totalCount = counts.reduce((a, b) => a + b, 0);
+          
+          document.getElementById('emotionStats').innerText = 
+              `😊 : ${counts[0]} | 😡 : ${counts[1]} | 😢 : ${counts[2]} | 😲 : ${counts[3]} | 😂 : ${counts[4]}`;
+          document.getElementById('totalCount').innerText = totalCount;
+
+          // Update stats every few seconds
+          setTimeout(simulateEmotionDetection, Math.random() * (5000 -3000) +3000);
+          
+          // Update mood graph
+          updateMoodGraph(counts);
+      }
+
+      // Function to update mood graph using Chart.js
+      const ctx = document.getElementById('moodGraph').getContext('2d');
+      let moodGraph;
+
+      function updateMoodGraph(counts) {
+          if (moodGraph) {
+              moodGraph.destroy(); // Destroy previous instance if it exists
+          }
+          
+          moodGraph = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: ['😊', '😡', '😢', '😲', '😂'],
+                  datasets: [{
+                      label: 'Detected Emotions',
+                      data: counts,
+                      backgroundColor: [
+                          'rgba(255,94,87,0.6)',
+                          'rgba(255,120,94,0.6)',
+                          'rgba(94,255,87,0.6)',
+                          'rgba(94,187,255,0.6)',
+                          'rgba(255,255,87,0.6)',
+                      ],
+                      borderColor: [
+                          'rgba(255,94,87,1)',
+                          'rgba(255,120,94,1)',
+                          'rgba(94,255,87,1)',
+                          'rgba(94,187,255,1)',
+                          'rgba(255,255,87,1)',
+                      ],
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                  scales: {
+                      yAxes: [{
+                          ticks: { beginAtZero:true }
+                      }]
+                  }
+              }
+          });
+      }
+    </script>
+
+</body>
+</html>
